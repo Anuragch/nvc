@@ -39,7 +39,10 @@
 #include <llvm-c/OrcBindings.h>
 #endif
 
-typedef struct module module_t;
+#ifdef __MINGW32__
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#endif
 
 #if LLVM_HAS_ORC
 static LLVMOrcJITStackRef orc_ref = NULL;
@@ -47,15 +50,24 @@ static LLVMOrcJITStackRef orc_ref = NULL;
 static LLVMExecutionEngineRef exec_engine = NULL;
 #endif
 
-
 static void *jit_search_loaded_syms(const char *name, bool required)
 {
-   dlerror();   // Clear any previous error
-
 #ifdef __MINGW32__
    if (*name == '_')
       name++;   // Remove leading underscore on Windows
-#endif
+
+   const char *search_modules[] = { NULL, "MSVCRT.DLL" };
+
+   for (size_t i = 0; i < ARRAY_LEN(search_modules); i++) {
+      HMODULE hmodule = GetModuleHandle(search_modules[i]);
+      void *ptr = (void *)(uintptr_t)GetProcAddress(hmodule, name);
+      if (ptr != NULL)
+         return ptr;
+   }
+
+   return NULL;
+#else
+   dlerror();   // Clear any previous error
 
    void *sym = dlsym(dl_handle, name);
    const char *error = dlerror();
@@ -66,6 +78,7 @@ static void *jit_search_loaded_syms(const char *name, bool required)
          fatal("%s", error);
    }
    return sym;
+#endif
 }
 
 void *jit_fun_ptr(const char *name, bool required)

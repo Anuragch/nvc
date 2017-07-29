@@ -371,15 +371,17 @@ static void from_rt_loc(const rt_loc_t *rt, loc_t *loc)
 ////////////////////////////////////////////////////////////////////////////////
 // Runtime support functions
 
-void     *_tmp_stack;
-uint32_t  _tmp_alloc;
+DLLEXPORT void     *_tmp_stack;
+DLLEXPORT uint32_t  _tmp_alloc;
 
+DLLEXPORT
 void _sched_process(int64_t delay)
 {
    TRACE("_sched_process delay=%s", fmt_time(delay));
    deltaq_insert_proc(delay, active_proc);
 }
 
+DLLEXPORT
 void _sched_waveform(void *_nids, void *values, int32_t n,
                      int64_t after, int64_t reject)
 {
@@ -417,6 +419,7 @@ void _sched_waveform(void *_nids, void *values, int32_t n,
    assert(offset == n);
 }
 
+DLLEXPORT
 void _sched_event(void *_nids, int32_t n, int32_t flags)
 {
    const int32_t *nids = _nids;
@@ -458,6 +461,7 @@ void _sched_event(void *_nids, int32_t n, int32_t flags)
    }
 }
 
+DLLEXPORT
 void _alloc_driver(const int32_t *all_nets, int32_t all_length,
                    const int32_t *driven_nets, int32_t driven_length,
                    const void *init)
@@ -513,6 +517,7 @@ void _alloc_driver(const int32_t *all_nets, int32_t all_length,
    }
 }
 
+DLLEXPORT
 void _private_stack(void)
 {
    TRACE("_private_stack %p %d %d", active_proc->tmp_stack,
@@ -528,6 +533,7 @@ void _private_stack(void)
    active_proc->tmp_alloc = _tmp_alloc;
 }
 
+DLLEXPORT
 void *_resolved_address(int32_t nid)
 {
    groupid_t gid = netdb_lookup(netdb, nid);
@@ -536,6 +542,7 @@ void *_resolved_address(int32_t nid)
    return g->resolved;
 }
 
+DLLEXPORT
 void _needs_last_value(const int32_t *nids, int32_t n)
 {
    TRACE("_needs_last_value %s n=%d", fmt_net(nids[0]), n);
@@ -549,6 +556,7 @@ void _needs_last_value(const int32_t *nids, int32_t n)
    }
 }
 
+DLLEXPORT
 void _set_initial(int32_t nid, const uint8_t *values, const int32_t *size_list,
                   int32_t nparts, void *resolution, const char *name)
 {
@@ -608,6 +616,7 @@ void _set_initial(int32_t nid, const uint8_t *values, const int32_t *size_list,
    }
 }
 
+DLLEXPORT
 void _assert_fail(const uint8_t *msg, int32_t msg_len, int8_t severity,
                   int8_t is_report, const rt_loc_t *where)
 {
@@ -653,6 +662,7 @@ void _assert_fail(const uint8_t *msg, int32_t msg_len, int8_t severity,
           : istr(tree_ident(active_proc->source))));
 }
 
+DLLEXPORT
 void _bounds_fail(int32_t value, int32_t min, int32_t max, int32_t kind,
                   rt_loc_t *where, const char *hint)
 {
@@ -711,6 +721,7 @@ void _bounds_fail(int32_t value, int32_t min, int32_t max, int32_t kind,
    }
 }
 
+DLLEXPORT
 int64_t _value_attr(const uint8_t *raw_str, int32_t str_len,
                     image_map_t *map, const rt_loc_t *where)
 {
@@ -801,6 +812,7 @@ int64_t _value_attr(const uint8_t *raw_str, int32_t str_len,
    return value;
 }
 
+DLLEXPORT
 void _div_zero(const rt_loc_t *where)
 {
    loc_t loc;
@@ -808,6 +820,7 @@ void _div_zero(const rt_loc_t *where)
    fatal_at(&loc, "division by zero");
 }
 
+DLLEXPORT
 void _null_deref(const rt_loc_t *where)
 {
    loc_t loc;
@@ -815,11 +828,13 @@ void _null_deref(const rt_loc_t *where)
    fatal_at(&loc, "null access dereference");
 }
 
+DLLEXPORT
 int64_t _std_standard_now(void)
 {
    return now;
 }
 
+DLLEXPORT
 void _nvc_env_stop(int32_t finish, int32_t have_status, int32_t status)
 {
    if (have_status)
@@ -830,6 +845,7 @@ void _nvc_env_stop(int32_t finish, int32_t have_status, int32_t status)
    exit(status);
 }
 
+DLLEXPORT
 void *_vec_load(const int32_t *nids, void *where,
                 int32_t low, int32_t high, int32_t last)
 {
@@ -875,6 +891,7 @@ void *_vec_load(const int32_t *nids, void *where,
    return where;
 }
 
+DLLEXPORT
 void _image(int64_t val, image_map_t *map, struct uarray *u)
 {
    char *buf = NULL;
@@ -916,6 +933,7 @@ void _image(int64_t val, image_map_t *map, struct uarray *u)
    u->dims[0].dir   = RANGE_TO;
 }
 
+DLLEXPORT
 void _bit_shift(int32_t kind, const uint8_t *data, int32_t len,
                 int8_t dir, int32_t shift, struct uarray *u)
 {
@@ -957,6 +975,7 @@ void _bit_shift(int32_t kind, const uint8_t *data, int32_t len,
    u->dims[0].dir   = dir;
 }
 
+DLLEXPORT
 void _bit_vec_op(int32_t kind, const uint8_t *left, int32_t left_len,
                  int8_t left_dir, const uint8_t *right, int32_t right_len,
                  int8_t right_dir, struct uarray *u)
@@ -1009,11 +1028,13 @@ void _bit_vec_op(int32_t kind, const uint8_t *left, int32_t left_len,
    u->dims[0].dir   = left_dir;
 }
 
+DLLEXPORT
 void _debug_out(int32_t val, int32_t reg)
 {
    printf("DEBUG: r%d val=%"PRIx32"\n", reg, val);
 }
 
+DLLEXPORT
 void _debug_dump(const uint8_t *ptr, int32_t len)
 {
    printf("---- %p ----\n", ptr);
@@ -1026,6 +1047,7 @@ void _debug_dump(const uint8_t *ptr, int32_t len)
    }
 }
 
+DLLEXPORT
 int64_t _last_event(const int32_t *nids, int32_t n)
 {
    //TRACE("_last_event %s n=%d %d", fmt_net(nids[0]), n);
@@ -1043,6 +1065,7 @@ int64_t _last_event(const int32_t *nids, int32_t n)
    return last;
 }
 
+DLLEXPORT
 int32_t _test_net_flag(const int32_t *nids, int32_t n, int32_t flag)
 {
    //TRACE("_test_net_flag %s n=%d flag=%d", fmt_net(nids[0]), n, flag);
@@ -1060,6 +1083,7 @@ int32_t _test_net_flag(const int32_t *nids, int32_t n, int32_t flag)
    return 0;
 }
 
+DLLEXPORT
 void _file_open(int8_t *status, void **_fp, uint8_t *name_bytes,
                 int32_t name_len, int8_t mode)
 {
@@ -1116,6 +1140,7 @@ void _file_open(int8_t *status, void **_fp, uint8_t *name_bytes,
    free(fname);
 }
 
+DLLEXPORT
 void _file_write(void **_fp, uint8_t *data, int32_t len)
 {
    FILE **fp = (FILE **)_fp;
@@ -1128,6 +1153,7 @@ void _file_write(void **_fp, uint8_t *data, int32_t len)
    fwrite(data, 1, len, *fp);
 }
 
+DLLEXPORT
 void _file_read(void **_fp, uint8_t *data, int32_t len, int32_t *out)
 {
    FILE **fp = (FILE **)_fp;
@@ -1142,6 +1168,7 @@ void _file_read(void **_fp, uint8_t *data, int32_t len, int32_t *out)
       *out = n;
 }
 
+DLLEXPORT
 void _file_close(void **_fp)
 {
    FILE **fp = (FILE **)_fp;
@@ -1155,6 +1182,7 @@ void _file_close(void **_fp)
    *fp = NULL;
 }
 
+DLLEXPORT
 int8_t _endfile(void *_f)
 {
    FILE *f = _f;
